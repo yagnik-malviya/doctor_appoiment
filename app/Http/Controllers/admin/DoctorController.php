@@ -174,6 +174,9 @@ class DoctorController extends Controller
 
     public function delete(Request $request, $id)
     {
+        $data = Doctor::where('id',$id)->first();
+        User::where('id',$data->user_id)->delete();
+
         Doctor::where('id',$id)->delete();
 
         return response()->json(['status' => 1]);

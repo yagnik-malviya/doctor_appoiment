@@ -15,11 +15,10 @@ class DashboardController extends Controller
     {
         $doctor = Doctor::where('user_id', Auth::user()->id)->first();
         $patient = Patient::where('doctor_id', $doctor->id)->get()->count();
-        $appoiment = Appoiment::where('doctor_id', $doctor->id)->first();
-        $all = $appoiment->get()->count();
-        $pending = $appoiment->where('status', 'pending')->get()->count();
-        $approve = $appoiment->where('status', 'approve')->get()->count();
-        $reject = $appoiment->where('status', 'reject')->get()->count();
+        $all = Appoiment::where('doctor_id', $doctor->id)->get()->count();
+        $pending = Appoiment::where('doctor_id', $doctor->id)->where('status', 'pending')->get()->count();
+        $approve = Appoiment::where('doctor_id', $doctor->id)->where('status', 'approve')->get()->count();
+        $reject = Appoiment::where('doctor_id', $doctor->id)->where('status', 'reject')->get()->count();
         $data = array(
             'patient' => $patient,
             'all' => $all,

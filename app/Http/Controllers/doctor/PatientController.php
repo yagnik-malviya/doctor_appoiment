@@ -12,6 +12,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -39,7 +40,7 @@ class PatientController extends Controller
 
                 ->addColumn('action', function($row){
                     $btn = '<a href="'.route('doctor.patient.edit',['id'=>$row->id]).'"><button class="btn-sm btn-success">Edit</button></a>
-                            <button onclick="Delete('.$row->user_id.')" class="btn-sm btn-danger">Delete</button>';
+                            <button onclick="Delete('.$row->id.')" class="btn-sm btn-danger">Delete</button>';
                     return $btn;
                 })
 
@@ -91,6 +92,26 @@ class PatientController extends Controller
             $form_data->user_id = $user_data->id;
             $form_data->doctor_id = $doctor->id;
             $form_data->save();
+
+            $link = route('patient.login');
+            $mailData = array(
+                'link' => $link,
+                'username' => $user_data->email,
+                'password' => $user_data->text_password
+            );
+
+            try {
+                $user_data['mail_name'] = env('MAIL_NAME');
+                $user_data['mail_from'] = env('MAIL_FROM');
+                $user_data['subject'] = 'Auth Details';
+
+                Mail::send('admin.mail_template.sendauthdetail', ['data' => $mailData, 'message', $this], function ($message) use ($user_data) {
+                    $message->from($user_data["mail_from"], $user_data["mail_name"])
+                        ->to($user_data["email"])
+                        ->subject($user_data["subject"]);
+                });
+            } catch (\Throwable $th) {
+            }
 
             $redirect = route('doctor.patient.list');
 			return response()->json(['status' => 1,'redirect' => $redirect]);
@@ -154,6 +175,9 @@ class PatientController extends Controller
 
     public function delete(Request $request, $id)
     {
+        $data = Patient::where('id',$id)->first();
+        User::where('id',$data->user_id)->delete();
+
         Patient::where('id', $id)->delete();
         return response()->json(['status' => 1]);
     }

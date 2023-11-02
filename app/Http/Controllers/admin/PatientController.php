@@ -97,7 +97,6 @@ class PatientController extends Controller
             $form_data->save();
 
             $link = route('patient.login');
-
             $mailData = array(
                 'link' => $link,
                 'username' => $user_data->email,
@@ -181,6 +180,9 @@ class PatientController extends Controller
 
     public function delete(Request $request, $id)
     {
+        $data = Patient::where('id',$id)->first();
+        User::where('id',$data->user_id)->delete();
+
         Patient::where('id', $id)->delete();
         return response()->json(['status' => 1]);
     }
