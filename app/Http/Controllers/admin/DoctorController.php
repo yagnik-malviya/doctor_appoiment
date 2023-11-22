@@ -3,11 +3,8 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Appoiment;
 use App\Models\Category;
 use App\Models\Doctor;
-use App\Models\Patient;
-use App\Models\Prescription;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -19,39 +16,30 @@ class DoctorController extends Controller
 {
     public function list(Request $request)
     {
-        if($request->ajax())
-        {
-                $data = Doctor::with('user','category')->orderBy('id','DESC');
-
-	                return DataTables::of($data)
-	                ->addIndexColumn()
-
-                    ->editColumn('name', function ($row)
-                    {
-                        return $row->user->name ?? '-';
-                    })
-
-                    ->editColumn('mobile', function ($row)
-                    {
-                        return $row->user->mobile ?? '-';
-                    })
-
-	                ->addColumn('action', function($row){
-                        $btn = '<a href="'.route('admin.doctor.edit',['id'=>$row->id]).'"><button class="btn-sm btn-success">Edit</button></a>
-                                <button onclick="Delete('.$row->id.')" class="btn-sm btn-danger">Delete</button>';
-                        return $btn;
-	                })
-
-	                ->rawColumns(['action'])
-	                ->make(true);
+        if ($request->ajax()) {
+            $data = Doctor::with('user', 'category')->orderBy('id', 'DESC');
+            return DataTables::of($data)
+                ->addIndexColumn()
+                ->editColumn('name', function ($row) {
+                    return $row->user->name ?? '-';
+                })
+                ->editColumn('mobile', function ($row) {
+                    return $row->user->mobile ?? '-';
+                })
+                ->addColumn('action', function ($row) {
+                    $btn = '<a href="' . route('admin.doctor.edit', ['id' => $row->id]) . '"><button class="btn-sm btn-success">Edit</button></a>
+                                <button onclick="Delete(' . $row->id . ')" class="btn-sm btn-danger">Delete</button>';
+                    return $btn;
+                })
+                ->rawColumns(['action'])
+                ->make(true);
         }
         return view('admin.doctor.list');
     }
 
     public function add(Request $request)
     {
-        if($request->ajax())
-        {
+        if ($request->ajax()) {
             //VALIDATION START
             $rules = array(
                 'name'  => 'required',
@@ -64,14 +52,13 @@ class DoctorController extends Controller
 
             if ($validator->fails()) {
 
-                $error=json_decode($validator->errors());
-                return response()->json(['status' => 401,'error1' => $error]);
+                $error = json_decode($validator->errors());
+                return response()->json(['status' => 401, 'error1' => $error]);
             }
 
             // email validation
-            $user = User::where(['email'=>$request->email,'role'=>'doctor'])->first();
-            if($user)
-            {
+            $user = User::where(['email' => $request->email, 'role' => 'doctor'])->first();
+            if ($user) {
                 return response()->json(['status' => 401, 'error1' => ['email' => 'This email is already register']]);
             }
             //VALIDATION END
@@ -95,7 +82,8 @@ class DoctorController extends Controller
             $mailData = array(
                 'link' => $link,
                 'username' => $user_data->email,
-                'password' => $user_data->text_password);
+                'password' => $user_data->text_password
+            );
 
 
             try {
@@ -103,7 +91,7 @@ class DoctorController extends Controller
                 $user_data['mail_from'] = env('MAIL_FROM');
                 $user_data['subject'] = 'Auth Details';
 
-                Mail::send('admin.mail_template.sendauthdetail', ['data'=>$mailData, 'message', $this], function ($message) use ($user_data) {
+                Mail::send('admin.mail_template.sendauthdetail', ['data' => $mailData, 'message', $this], function ($message) use ($user_data) {
                     $message->from($user_data["mail_from"], $user_data["mail_name"])
                         ->to($user_data["email"])
                         ->subject($user_data["subject"]);
@@ -112,7 +100,7 @@ class DoctorController extends Controller
             }
 
             $redirect = route('admin.doctor.list');
-			return response()->json(['status' => 1,'redirect' => $redirect]);
+            return response()->json(['status' => 1, 'redirect' => $redirect]);
         }
         $category = Category::get();
         return view('admin.doctor.add')->with(['category' => $category]);
@@ -120,8 +108,7 @@ class DoctorController extends Controller
 
     public function edit(Request $request, $id)
     {
-        if($request->ajax())
-        {
+        if ($request->ajax()) {
             //VALIDATION START
             $rules = array(
                 'name'  => 'required',
@@ -139,9 +126,8 @@ class DoctorController extends Controller
             }
             //VALIDATION END
 
-            $user_data = User::where('id',$request->user_id)->first();
-            if($user_data->email != $request->email)
-            {
+            $user_data = User::where('id', $request->user_id)->first();
+            if ($user_data->email != $request->email) {
                 $user = User::where(['email' => $request->email, 'role' => 'doctor'])->first();
                 if ($user) {
                     return response()->json(['status' => 401, 'error1' => ['email' => 'This email is already register']]);
@@ -159,25 +145,24 @@ class DoctorController extends Controller
             $form_data->save();
 
             $redirect = route('admin.doctor.list');
-			return response()->json(['status' => 1,'redirect' => $redirect]);
+            return response()->json(['status' => 1, 'redirect' => $redirect]);
         }
 
-        $data = Doctor::where('id',$id)->first();
+        $data = Doctor::where('id', $id)->first();
         $category = Category::get();
-        if(empty($data))
-        {
+        if (empty($data)) {
             return redirect()->back();
         }
 
-        return view('admin.doctor.edit')->with(['data' => $data,'category' => $category]);
+        return view('admin.doctor.edit')->with(['data' => $data, 'category' => $category]);
     }
 
     public function delete(Request $request, $id)
     {
-        $data = Doctor::where('id',$id)->first();
-        User::where('id',$data->user_id)->delete();
+        $data = Doctor::where('id', $id)->first();
+        User::where('id', $data->user_id)->delete();
 
-        Doctor::where('id',$id)->delete();
+        Doctor::where('id', $id)->delete();
 
         return response()->json(['status' => 1]);
     }
