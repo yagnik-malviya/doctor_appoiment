@@ -16,7 +16,7 @@ Route::group(['namespace' => 'patient', 'as' => 'patient.'], function () {
     Route::match(['get', 'post'], 'reset_password', [AuthController::class, 'reset_password'])->name('reset_password');
 
 
-    Route::group(['middleware' => 'patient'], function () {
+    Route::group(['middleware' => 'patient', 'middleware' => 'prevent-back-history'], function () {
         Route::match(['get', 'post'], 'profile', [AuthController::class, 'profile'])->name('profile');
         Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
