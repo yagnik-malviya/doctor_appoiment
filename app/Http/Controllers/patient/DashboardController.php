@@ -13,11 +13,10 @@ class DashboardController extends Controller
     public function dashboard()
     {
         $patient = Patient::where('user_id',Auth::user()->id)->first();
-        $appoiment = Appoiment::where('patient_id',$patient->id)->first();
-        $all = $appoiment->get()->count();
-        $pending = $appoiment->where('status','pending')->get()->count();
-        $approve = $appoiment->where('status','approve')->get()->count();
-        $reject = $appoiment->where('status','reject')->get()->count();
+        $all = Appoiment::where('patient_id',$patient->id)->get()->count();
+        $pending = Appoiment::where('patient_id',$patient->id)->where('status','pending')->get()->count();
+        $approve = Appoiment::where('patient_id',$patient->id)->where('status','approve')->get()->count();
+        $reject = Appoiment::where('patient_id',$patient->id)->where('status','reject')->get()->count();
         $data = array(
             'all' => $all,
             'pending' => $pending,
