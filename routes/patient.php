@@ -11,6 +11,7 @@ Route::group(['namespace' => 'patient', 'as' => 'patient.'], function () {
 
 
     Route::match(['get', 'post'], 'login', [AuthController::class, 'login'])->name('login');
+    Route::match(['get', 'post'], 'register', [AuthController::class, 'register'])->name('register');
 
     Route::match(['get', 'post'], 'forgot_password', [AuthController::class, 'forgot_password'])->name('forgot_password');
     Route::match(['get', 'post'], 'reset_password', [AuthController::class, 'reset_password'])->name('reset_password');

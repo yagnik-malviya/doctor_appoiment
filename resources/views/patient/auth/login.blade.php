@@ -32,7 +32,10 @@
             </div>
 
             <div class="col-12">
-            <button class="btn btn-primary w-100" type="submit" id="submitData">Login</button>
+                <button class="btn btn-primary w-100" type="submit" id="submitData">Login</button>
+                <div class="w-100 text-center mt-3">
+                    <a href="{{route('patient.register')}}" class="test-center w-100">Sign Up</a>
+                </div>
             </div>
         </form>
     @endslot

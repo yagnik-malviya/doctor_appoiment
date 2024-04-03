@@ -4,6 +4,7 @@ namespace App\Http\Controllers\admin;
 
 use App\Helper\ImageManager;
 use App\Http\Controllers\Controller;
+use App\Jobs\SendEmailJob;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -83,12 +84,12 @@ class AuthController extends Controller
             $user->remember_token = $token;
             $user->save();
 
-            $link = route('admin.reset_password').'/?'.$token;
+            $user->link = route('admin.reset_password').'/?'.$token;
+            $user->mail_type = 'forgot_password';
 
-            Mail::send('admin.mail_template.forgotmail', ['link' => $link], function ($m) use ($user)
-            {
-                $m->to($user->email)->subject("Reset your password");
-            });
+            $details = $user->getAttributes();
+
+            dispatch(new SendEmailJob($details));
             return response()->json(['status' => 1,'message' => 'Please Check Mail']);
 
         }

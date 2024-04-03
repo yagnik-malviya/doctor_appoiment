@@ -166,6 +166,48 @@ class AuthController extends Controller
         return view('patient.auth.profile');
     }
 
+    public function register(Request $request)
+    {
+        if($request->ajax())
+        {
+            //VALIDATION START
+            $rules = array(
+                'name'  => 'required',
+                'email'  => 'required|email',
+                'mobile'  => 'required|max:10|min:10',
+                'password'  => 'required',
+                'conform_password'  => 'required|same:password',
+            );
+
+            $validator = Validator::make($request->all(), $rules);
+
+            if ($validator->fails()) {
+
+                $error = json_decode($validator->errors());
+                return response()->json(['status' => 401, 'error1' => $error]);
+            }
+
+            // email validation
+            $user = User::where(['email' => $request->email, 'role' => 'patient'])->first();
+            if ($user) {
+                return response()->json(['status' => 401, 'error1' => ['email' => 'This email is already register']]);
+            }
+            //VALIDATION END
+
+            $user_data = new User();
+            $user_data->name = $request->name;
+            $user_data->email = $request->email;
+            $user_data->mobile = $request->mobile;
+            $user_data->password    =   Hash::make($request->password);
+            $user_data->text_password   =   $request->password;
+            $user_data->save();
+
+            $redirect = route('patient.login');
+            return response()->json(['status' => 1, 'redirect' => $redirect]);
+        }
+        return view('patient.auth.register');
+    }
+
     public function logout()
     {
         Auth::logout();
