@@ -15,6 +15,7 @@ return new class extends Migration
         Schema::create('appoiments', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('patient_id')->nullable();
+            $table->bigInteger('category_id')->nullable();
             $table->bigInteger('doctor_id')->nullable();
             $table->timestamp('date_time')->nullable();
             $table->enum('status', ['pending','approve','reject'])->nullable();

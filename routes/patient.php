@@ -28,6 +28,7 @@ Route::group(['namespace' => 'patient', 'as' => 'patient.'], function () {
             Route::match(['get', 'post'], 'edit/{id}', [AppoimentController::class, 'edit'])->name('edit');
             Route::match(['get', 'post'], 'delete/{id}', [AppoimentController::class, 'delete'])->name('delete');
             Route::match(['get', 'post'], 'changestatus', [AppoimentController::class, 'changestatus'])->name('changestatus');
+            Route::match(['get', 'post'], 'change_category', [AppoimentController::class, 'change_category'])->name('change_category');
         });
 
         Route::group(['namespace' => 'prescription', 'prefix' => 'prescription', 'as' => 'prescription.'], function () {

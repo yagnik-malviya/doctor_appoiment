@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Doctor;
 use App\Models\Patient;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -16,6 +17,15 @@ use Yajra\DataTables\Facades\DataTables;
 
 class AppoimentController extends Controller
 {
+
+    protected $date = '';
+
+    public function __construct()
+    {
+        date_default_timezone_set('Asia/Kolkata');
+        $this->date = Carbon::now();
+    }
+
     public function list(Request $request)
     {
         $patient = Patient::where('user_id', Auth::user()->id)->first();
@@ -65,7 +75,7 @@ class AppoimentController extends Controller
 
     public function add(Request $request)
     {
-        $patient = Patient::where('user_id', Auth::user()->id)->first();
+
         if($request->ajax())
         {
             //VALIDATION START
@@ -82,26 +92,38 @@ class AppoimentController extends Controller
                 return response()->json(['status' => 401,'error1' => $error]);
             }
 
+            $startdateTime = Carbon::create($request->date_time);
+            $enddateTime = Carbon::create($request->date_time)->subMinutes(30);
+
+            $checkSlot = Appoiment::where('date_time', '<=', $startdateTime)->where('date_time', '>=', $enddateTime)->first();
+            if($checkSlot)
+            {
+                return response()->json(['status' => 401, 'error1' => ['date_time' => 'This Slot Is Allready Book']]);
+            }
             //VALIDATION END
 
+
+            $patient = Patient::where('user_id', Auth::user()->id)->first();
+            $patient->doctor_id = $request->doctor;
+            $patient->save();
+
             $form_data = new Appoiment();
+            $form_data->category_id  = $request->category;
             $form_data->patient_id  = $patient->id;
             $form_data->doctor_id   = $request->doctor;
-            $form_data->date_time   = $request->date_time;
+            $form_data->date_time   = $startdateTime;
             $form_data->status   = 'pending';
             $form_data->save();
-
             $redirect = route('patient.appoiment.list');
 			return response()->json(['status' => 1,'redirect' => $redirect]);
         }
 
-        $doctor = Doctor::get();
-        return view('patient.appoiment.add')->with(['doctor'=>$doctor]);
+        $category = Category::get();
+        return view('patient.appoiment.add')->with(['category'=> $category]);
     }
 
     public function edit(Request $request, $id)
     {
-        $patient = Patient::where('user_id', Auth::user()->id)->first();
         if($request->ajax())
         {
             //VALIDATION START
@@ -117,9 +139,27 @@ class AppoimentController extends Controller
                 $error = json_decode($validator->errors());
                 return response()->json(['status' => 401, 'error1' => $error]);
             }
+
+            $startdateTime = Carbon::create($request->date_time);
+            $enddateTime = Carbon::create($request->date_time)->subMinutes(30);
+
+            $cheeckAppoiment = Appoiment::where('date_time', '=', $startdateTime)->first();
+            if(empty($cheeckAppoiment))
+            {
+                $checkSlot = Appoiment::where('date_time', '<=', $startdateTime)->where('date_time', '>=', $enddateTime)->first();
+                if ($checkSlot) {
+                    return response()->json(['status' => 401, 'error1' => ['date_time' => 'This Slot Is Allready Book']]);
+                }
+            }
+
             //VALIDATION END
 
+            $patient = Patient::where('user_id', Auth::user()->id)->first();
+            $patient->doctor_id = $request->doctor;
+            $patient->save();
+
             $form_data = Appoiment::where('id',$request->id)->first();
+            $form_data->category_id  = $request->category;
             $form_data->patient_id  = $patient->id;
             $form_data->doctor_id   = $request->doctor;
             $form_data->date_time   = $request->date_time;
@@ -136,8 +176,8 @@ class AppoimentController extends Controller
             return redirect()->back();
         }
 
-        $doctor = Doctor::get();
-        return view('patient.appoiment.edit')->with(['data' => $data, 'doctor' => $doctor]);
+        $category = Category::get();
+        return view('patient.appoiment.edit')->with(['data' => $data, 'category' => $category]);
     }
 
     public function delete(Request $request, $id)
@@ -151,5 +191,24 @@ class AppoimentController extends Controller
     {
         Appoiment::where('id',$request->id)->update(['status'=>$request->status]);
         return response()->json(['status' => 1]);
+    }
+
+    public function change_category(Request $request)
+    {
+        if ($request->ajax())
+        {
+            $data = [];
+            $doctor = Doctor::get();
+            foreach ($doctor as $key => $value) {
+                if(in_array($request->category,json_decode($value->category_id)))
+                {
+                    $data[] = array(
+                        'id' => $value->id,
+                        'name' => $value->user->name,
+                    );
+                }
+            }
+            return response()->json(['status' => 1, 'data' => $data]);
+        }
     }
 }

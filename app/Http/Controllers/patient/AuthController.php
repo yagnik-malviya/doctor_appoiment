@@ -4,6 +4,7 @@ namespace App\Http\Controllers\patient;
 
 use App\Helper\ImageManager;
 use App\Http\Controllers\Controller;
+use App\Models\Patient;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -201,6 +202,10 @@ class AuthController extends Controller
             $user_data->password    =   Hash::make($request->password);
             $user_data->text_password   =   $request->password;
             $user_data->save();
+
+            $patient = new Patient();
+            $patient->user_id = $user_data->id;
+            $patient->save();
 
             $redirect = route('patient.login');
             return response()->json(['status' => 1, 'redirect' => $redirect]);

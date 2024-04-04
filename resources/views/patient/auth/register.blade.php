@@ -51,6 +51,9 @@
 
             <div class="col-12">
                 <button class="btn btn-primary w-100" type="submit" id="submitData">Sign Up</button>
+                <div class="w-100 text-center mt-3">
+                    <a href="{{route('patient.login')}}" class="test-center w-100">Login In</a>
+                </div>
             </div>
         </form>
     @endslot

@@ -15,18 +15,26 @@
         <form name="formData" class="row" onsubmit="return false;" method="POST">
             @csrf
 
-            <div class="form-group mt-3 col-6 err_doctor">
-                <label>Doctor</label>
-                <select name="doctor" class="form-control">
-                    <option value="">Select Doctor</option>
-                    @foreach ($doctor as $value)
-                        <option value="{{$value->id}}">{{$value->user->name}}</option>
+            <div class="form-group mt-3 col-4 err_category">
+                <label>Category</label>
+                <select name="category" class="form-control category" onchange="changecategory()">
+                    <option value="">Select Category</option>
+                    @foreach ($category as $value)
+                        <option value="{{$value->id}}">{{$value->name}}</option>
                     @endforeach
+                </select>
+                <span class="text-danger mt-2 errmsg errmsg_category"></span>
+            </div>
+
+            <div class="form-group mt-3 col-4 err_doctor">
+                <label>Doctor</label>
+                <select name="doctor" class="form-control doctor">
+                    <option value="">Select Doctor</option>
                 </select>
                 <span class="text-danger mt-2 errmsg errmsg_doctor"></span>
             </div>
 
-            <div class="form-group mt-3 col-6 err_date_time">
+            <div class="form-group mt-3 col-4 err_date_time">
                 <label>Date & Time</label>
                 <input type="datetime-local" name="date_time" class="form-control">
                 <span class="text-danger mt-2 errmsg errmsg_date_time"></span>
@@ -41,6 +49,40 @@
 
     @slot('js')
         <script>
+            function  changecategory()
+            {
+                var formData = new FormData();
+                var url = '{{ route('patient.appoiment.change_category') }}';
+                formData.append("category", $('.category').val());
+                formData.append("_token", "{{ csrf_token() }}");
+
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    processData: false,
+                    contentType: false,
+                    dataType: 'json',
+                    data: formData,
+                    dataSrc: "",
+                    beforeSend: function() {
+                        $('.loader').removeClass('d-none');
+                    },
+                    complete: function(data, status) {
+                        $('.loader').addClass('d-none');
+                    },
+                    success: function(data) {
+                        if (data.status == 1) {
+                            var dataHtml = `<option value="">Select Doctor</option>`;
+                            $.each(data.data, function(index, value)
+                            {
+                                dataHtml += `<option value="${value.id}">${value.name}</option>`;
+                            });
+                            $('.doctor').html(dataHtml);
+                        }
+                    },
+                });
+            }
+
             $('#submitData').on('click', function(e)
             {
                 $('input').removeClass('border border-danger');
