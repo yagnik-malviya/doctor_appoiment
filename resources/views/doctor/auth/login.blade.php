@@ -28,7 +28,7 @@
             </div>
 
             <div class="col-12 text-end">
-            <p class="small mb-0"><a href="{{route('admin.forgot_password')}}">Forget Password</a></p>
+            <p class="small mb-0"><a href="{{route('doctor.forgot_password')}}">Forget Password</a></p>
             </div>
 
             <div class="col-12">

@@ -37,8 +37,19 @@
             <div class="form-group mt-3 col-3 err_date_time">
                 <label>Date & Time</label>
                 <input type="hidden" name="id" id="id" value="{{$data->id}}">
-                <input type="datetime-local" name="date_time" class="form-control" value="{{$data->date_time}}">
+                <input type="date" name="date_time" class="form-control" value="{{$data->date_time}}">
                 <span class="text-danger mt-2 errmsg errmsg_date_time"></span>
+            </div>
+
+            <div class="form-group mt-3 col-6 err_slot">
+                <label>Slot</label>
+                <select name="slot" class="form-control">
+                    <option value="">Select Slot</option>
+                    @foreach ($slot as $value)
+                        <option value="{{$value->id}}" {{$data->slot_id == $value->id ? 'selected' : ''}}>{{$value->slot}}</option>
+                    @endforeach
+                </select>
+                <span class="text-danger mt-2 errmsg errmsg_slot"></span>
             </div>
 
             <div class="form-group mt-3 col-12">

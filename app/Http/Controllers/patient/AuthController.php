@@ -4,6 +4,7 @@ namespace App\Http\Controllers\patient;
 
 use App\Helper\ImageManager;
 use App\Http\Controllers\Controller;
+use App\Jobs\SendEmailJob;
 use App\Models\Patient;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -80,16 +81,16 @@ class AuthController extends Controller
             //VALIDATION END
 
             $token = Str::random(100);
-            $user = User::where('email',$request->email)->first();
+            $user = User::where('email', $request->email)->first();
             $user->remember_token = $token;
             $user->save();
 
-            $link = route('patient.reset_password').'/?'.$token;
+            $user->link = route('doctor.reset_password') . '/?' . $token;
+            $user->mail_type = 'forgot_password';
 
-            Mail::send('patient.mail_template.forgotmail', ['link' => $link], function ($m) use ($user)
-            {
-                $m->to($user->email)->subject("Reset your password");
-            });
+            $details = $user->getAttributes();
+
+            dispatch(new SendEmailJob($details));
 
             return response()->json(['status' => 1,'message' => 'Please Check Mail']);
 

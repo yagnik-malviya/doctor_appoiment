@@ -131,6 +131,7 @@ class AuthController extends Controller
                     if(!empty($user))
                     {
                         $user->password = Hash::make($request->new_password);
+                        $user->text_password = $request->new_password;
                         $user->remember_token = Null;
                         $user->save();
 

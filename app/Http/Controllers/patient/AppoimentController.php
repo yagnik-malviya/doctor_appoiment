@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\patient;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SendEmailJob;
 use App\Models\Appoiment;
 use App\Models\Category;
 use App\Models\Doctor;
 use App\Models\Patient;
+use App\Models\Slot;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -81,7 +83,8 @@ class AppoimentController extends Controller
             //VALIDATION START
             $rules = array(
                 'doctor'  => 'required',
-                'date_time'  => 'required'
+                'date_time'  => 'required',
+                'slot'  => 'required'
             );
 
             $validator = Validator::make($request->all(), $rules);
@@ -92,14 +95,14 @@ class AppoimentController extends Controller
                 return response()->json(['status' => 401,'error1' => $error]);
             }
 
-            $startdateTime = Carbon::create($request->date_time);
-            $enddateTime = Carbon::create($request->date_time)->subMinutes(30);
+            // $startdateTime = Carbon::create($request->date_time);
+            // $enddateTime = Carbon::create($request->date_time)->subMinutes(30);
 
-            $checkSlot = Appoiment::where('date_time', '<=', $startdateTime)->where('date_time', '>=', $enddateTime)->first();
-            if($checkSlot)
-            {
-                return response()->json(['status' => 401, 'error1' => ['date_time' => 'This Slot Is Allready Book']]);
-            }
+            // $checkSlot = Appoiment::where('date_time', '<=', $startdateTime)->where('date_time', '>=', $enddateTime)->first();
+            // if($checkSlot)
+            // {
+            //     return response()->json(['status' => 401, 'error1' => ['date_time' => 'This Slot Is Allready Book']]);
+            // }
             //VALIDATION END
 
 
@@ -107,19 +110,39 @@ class AppoimentController extends Controller
             $patient->doctor_id = $request->doctor;
             $patient->save();
 
+            $slot_check = Appoiment::where('patient_id', $patient->id)
+                ->where('doctor_id', $request->doctor)
+                ->whereDate('date_time', $request->date_time)
+                ->where('slot_id', $request->slot)
+                ->first();
+
+            if ($slot_check) {
+                return response()->json(['status' => 401, 'error1' => ['slot' => 'This slot is Booked']]);
+            }
+
             $form_data = new Appoiment();
             $form_data->category_id  = $request->category;
             $form_data->patient_id  = $patient->id;
             $form_data->doctor_id   = $request->doctor;
-            $form_data->date_time   = $startdateTime;
+            $form_data->date_time   = $request->date_time;
+            $form_data->slot_id   = $request->slot;
             $form_data->status   = 'pending';
             $form_data->save();
+
+            $form_data->name = $form_data->patient->user->name ?? '';
+            $form_data->email = $form_data->patient->user->email ?? '';
+            $form_data->mail_type = 'appoiment';
+            $details = $form_data->getAttributes();
+            dispatch(new SendEmailJob($details));
+
+
             $redirect = route('patient.appoiment.list');
 			return response()->json(['status' => 1,'redirect' => $redirect]);
         }
 
         $category = Category::get();
-        return view('patient.appoiment.add')->with(['category'=> $category]);
+        $slot = Slot::get();
+        return view('patient.appoiment.add')->with(['category'=>$category, 'slot' => $slot]);
     }
 
     public function edit(Request $request, $id)
@@ -129,7 +152,8 @@ class AppoimentController extends Controller
             //VALIDATION START
             $rules = array(
                 'doctor'  => 'required',
-                'date_time'  => 'required'
+                'date_time'  => 'required',
+                'slot'  => 'required'
             );
 
             $validator = Validator::make($request->all(), $rules);
@@ -143,14 +167,14 @@ class AppoimentController extends Controller
             $startdateTime = Carbon::create($request->date_time);
             $enddateTime = Carbon::create($request->date_time)->subMinutes(30);
 
-            $cheeckAppoiment = Appoiment::where('date_time', '=', $startdateTime)->first();
-            if(empty($cheeckAppoiment))
-            {
-                $checkSlot = Appoiment::where('date_time', '<=', $startdateTime)->where('date_time', '>=', $enddateTime)->first();
-                if ($checkSlot) {
-                    return response()->json(['status' => 401, 'error1' => ['date_time' => 'This Slot Is Allready Book']]);
-                }
-            }
+            // $cheeckAppoiment = Appoiment::where('date_time', '=', $startdateTime)->first();
+            // if(empty($cheeckAppoiment))
+            // {
+            //     $checkSlot = Appoiment::where('date_time', '<=', $startdateTime)->where('date_time', '>=', $enddateTime)->first();
+            //     if ($checkSlot) {
+            //         return response()->json(['status' => 401, 'error1' => ['date_time' => 'This Slot Is Allready Book']]);
+            //     }
+            // }
 
             //VALIDATION END
 
@@ -158,13 +182,36 @@ class AppoimentController extends Controller
             $patient->doctor_id = $request->doctor;
             $patient->save();
 
+
+
+            $slot_check = Appoiment::where('patient_id', $patient->id)
+                ->where('doctor_id', $request->doctor)
+                ->whereDate('date_time', $request->date_time)
+                ->where('slot_id', $request->slot)
+                ->first();
+
+
+            if ($slot_check) {
+                if ($slot_check->slot_id != $request->slot || $slot_check->patient_id != $patient->id || $slot_check->doctor_id != $request->doctor || $slot_check->date_time != $request->date_time) {
+                    return response()->json(['status' => 401, 'error1' => ['slot' => 'This slot is Booked']]);
+                }
+            }
+
             $form_data = Appoiment::where('id',$request->id)->first();
             $form_data->category_id  = $request->category;
             $form_data->patient_id  = $patient->id;
             $form_data->doctor_id   = $request->doctor;
             $form_data->date_time   = $request->date_time;
+            $form_data->slot_id   = $request->slot;
             $form_data->status   = 'pending';
             $form_data->save();
+
+
+            $form_data->name = $form_data->patient->user->name ?? '';
+            $form_data->email = $form_data->patient->user->email ?? '';
+            $form_data->mail_type = 'appoiment';
+            $details = $form_data->getAttributes();
+            dispatch(new SendEmailJob($details));
 
             $redirect = route('patient.appoiment.list');
 			return response()->json(['status' => 1,'redirect' => $redirect]);
@@ -177,12 +224,18 @@ class AppoimentController extends Controller
         }
 
         $category = Category::get();
-        return view('patient.appoiment.edit')->with(['data' => $data, 'category' => $category]);
+        $slot = Slot::get();
+        return view('patient.appoiment.edit')->with(['data' => $data, 'category' => $category ,'slot' => $slot]);
     }
 
     public function delete(Request $request, $id)
     {
         $appoiment = Appoiment::where('id',$id)->first();
+        $appoiment->name =  $appoiment->patient->user->name ?? '';
+        $appoiment->email =  $appoiment->patient->user->email ?? '';
+        $appoiment->mail_type = 'appoiment_remove';
+        $details =  $appoiment->getAttributes();
+        dispatch(new SendEmailJob($details));
         $appoiment->destroy($id);
         return response()->json(['status' => 1]);
     }
@@ -190,6 +243,12 @@ class AppoimentController extends Controller
     public function changestatus(Request $request)
     {
         Appoiment::where('id',$request->id)->update(['status'=>$request->status]);
+        $appoiment = Appoiment::where('id', $request->id)->first();
+        $appoiment->name =  $appoiment->patient->user->name ?? '';
+        $appoiment->email =  $appoiment->patient->user->email ?? '';
+        $appoiment->mail_type = 'appoiment_status';
+        $details =  $appoiment->getAttributes();
+        dispatch(new SendEmailJob($details));
         return response()->json(['status' => 1]);
     }
 
