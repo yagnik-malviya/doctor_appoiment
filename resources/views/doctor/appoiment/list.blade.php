@@ -1,5 +1,5 @@
 @component('doctor.component.content')
-    @slot('title') Appoiment @endslot
+    @slot('title') Appointment @endslot
 
     @slot('navigation')
         <ol class="breadcrumb">
@@ -19,7 +19,8 @@
 		                <th> SL </th>
 		                <th> Patient name </th>
 		                <th> Patient Mobile </th>
-		                <th> Appoiment Date </th>
+		                <th> Appointment Date </th>
+		                <th> Slot </th>
 		                <th> Status </th>
 		                <th> Action </th>
 		            </tr>
@@ -34,6 +35,7 @@
             $(function () {
 		        var table = $('.table').DataTable({
 		            processing: true,
+searching: false,
 		            serverSide: true,
 		            ajax: "{{ route('doctor.appoiment.list') }}",
 		            columns: [
@@ -41,6 +43,7 @@
 		                {data: 'patient_name', name: 'patient_name', orderable: false, searchable: false },
 		                {data: 'patient_mobile', name: 'patient_mobile', orderable: false, searchable: false },
 		                {data: 'date', name: 'date', orderable: false, searchable: false },
+		                {data: 'slot', name: 'slot', orderable: false, searchable: false },
 		                {data: 'status', name: 'status',orderable: true,searchable: true},
 		                {data: 'action',name: 'action',orderable: true,searchable: true},
 		            ]

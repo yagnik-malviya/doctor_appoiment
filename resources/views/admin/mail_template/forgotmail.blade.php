@@ -7,6 +7,6 @@
     <title>Forgot Password</title>
 </head>
 <body>
-    <a href="{{$link}}">Click for forget Password</a>
+    <a href="{{$link}}">Click for Forgot Password</a>
 </body>
 </html>

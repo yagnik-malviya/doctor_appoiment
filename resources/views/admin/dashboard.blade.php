@@ -21,10 +21,10 @@
                     $appoiment_data = [
                         ['title' => 'Total Doctor', 'count' => $doctor],
                         ['title' => 'Total Patient', 'count' => $patient],
-                        ['title' => 'Total Appoiment', 'count' => $all],
-                        ['title' => 'Pending Appoiment', 'count' => $pending],
-                        ['title' => 'Approve Appoiment', 'count' => $approve],
-                        ['title' => 'Reject Appoiment', 'count' => $reject],
+                        ['title' => 'Total Appointment', 'count' => $all],
+                        ['title' => 'Pending Appointment', 'count' => $pending],
+                        ['title' => 'Approve Appointment', 'count' => $approve],
+                        ['title' => 'Reject Appointment', 'count' => $reject],
                     ];
                 @endphp
                 <div class="col-lg-12">

@@ -33,6 +33,7 @@
             $(function () {
 		        var table = $('.table').DataTable({
 		            processing: true,
+searching: false,
 		            serverSide: true,
 		            ajax: "{{ route('admin.patient.list') }}",
 		            columns: [

@@ -1,5 +1,5 @@
 @component('doctor.component.content')
-    @slot('title') Appoiment @endslot
+    @slot('title') Appointment @endslot
 
     @slot('navigation')
         <ol class="breadcrumb">
@@ -46,6 +46,7 @@
 
             <div class="form-group mt-3 col-12">
                 <button class="btn btn-success" id="submitData">Submit</button>
+                <a href="{{route('doctor.appoiment.list')}}"><div class="btn btn-danger">Cancel</div></a>
             </div>
 
         </form>

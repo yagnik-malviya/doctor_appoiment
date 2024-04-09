@@ -1,5 +1,5 @@
 @component('patient.component.content')
-    @slot('title') Appoiment @endslot
+    @slot('title') Appointment @endslot
 
     @slot('navigation')
         <ol class="breadcrumb">
@@ -14,13 +14,12 @@
     @slot('content')
         <form name="formData" class="row" onsubmit="return false;" method="POST">
             @csrf
-
             <div class="form-group mt-3 col-4 err_category">
                 <label>Category</label>
                 <select name="category" class="form-control category" onchange="changecategory()">
                     <option value="">Select Category</option>
                     @foreach ($category as $value)
-                        <option value="{{$value->id}}" {{$value->id == $data->id ? 'selected' : ''}}>{{$value->name}}</option>
+                        <option value="{{$value->id}}" {{$value->id == $data->category_id ? 'selected' : ''}}>{{$value->name}}</option>
                     @endforeach
                 </select>
                 <span class="text-danger mt-2 errmsg errmsg_category"></span>
@@ -54,6 +53,7 @@
 
             <div class="form-group mt-3 col-12">
                 <button class="btn btn-success" id="submitData">Submit</button>
+                <a href="{{route('patient.appoiment.list')}}"><div class="btn btn-danger">Cancel</div></a>
             </div>
 
         </form>
@@ -89,7 +89,6 @@
                             $.each(data.data, function(index, value)
                             {
                                 var doctor_id = '{{$data->doctor_id}}';
-                                console.log(doctor_id);
                                 var selected = ''
                                 if(doctor_id == (value.id))
                                 {

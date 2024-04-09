@@ -35,7 +35,7 @@ Route::group(['namespace' => 'admin', 'as' => 'admin.'], function () {
             Route::match(['get', 'post'], 'edit/{id}', [PatientController::class, 'edit'])->name('edit');
             Route::match(['get', 'post'], 'delete/{id}', [PatientController::class, 'delete'])->name('delete');
         });
-        Route::group(['namespace' => 'appoiment', 'prefix' => 'appoiment', 'as' => 'appoiment.'], function () {
+        Route::group(['namespace' => 'appointment', 'prefix' => 'appointment', 'as' => 'appoiment.'], function () {
             Route::match(['get', 'post'], 'list', [AppoimentController::class, 'list'])->name('list');
             Route::match(['get', 'post'], 'add', [AppoimentController::class, 'add'])->name('add');
             Route::match(['get', 'post'], 'edit/{id}', [AppoimentController::class, 'edit'])->name('edit');

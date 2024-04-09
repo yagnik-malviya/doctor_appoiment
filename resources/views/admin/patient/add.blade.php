@@ -46,6 +46,7 @@
 
             <div class="form-group mt-3 col-12">
                 <button class="btn btn-success" id="submitData">Submit</button>
+                <a href="{{route('admin.patient.list')}}"><div class="btn btn-danger">Cancel</div></a>
             </div>
 
         </form>

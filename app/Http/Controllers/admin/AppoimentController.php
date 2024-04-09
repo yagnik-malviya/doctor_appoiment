@@ -21,7 +21,7 @@ class AppoimentController extends Controller
     {
         if($request->ajax())
         {
-            $data = Appoiment::with('doctor', 'patient')->orderBy('date_time','ASC');
+            $data = Appoiment::with('doctor', 'patient')->orderBy('id','DESC');
 
                 return DataTables::of($data)
                 ->addIndexColumn()
@@ -44,6 +44,11 @@ class AppoimentController extends Controller
                 ->editColumn('patient_mobile', function ($row)
                 {
                     return $row->patient->user->mobile ?? '-';
+                })
+
+                ->editColumn('slot', function ($row)
+                {
+                    return $row->slot->slot ?? '-';
                 })
 
                 ->editColumn('date', function ($row)
@@ -90,21 +95,19 @@ class AppoimentController extends Controller
             if ($validator->fails()) {
 
                 $error=json_decode($validator->errors());
-                // return response()->json(['status' => 401,'error1' => $error]);
+                return response()->json(['status' => 401,'error1' => $error]);
             }
 
             //VALIDATION END
 
-            $slot_check = Appoiment::where('patient_id', $request->patient)
-                ->where('doctor_id', $request->doctor)
+            $slot_check = Appoiment::where('doctor_id', $request->doctor)
                 ->whereDate('date_time', $request->date_time)
                 ->where('slot_id', $request->slot)
                 ->first();
 
             if ($slot_check) {
-                // return response()->json(['status' => 401, 'error1' => ['slot'=>'This slot is Booked']]);
+                return response()->json(['status' => 401, 'error1' => ['slot'=>'This slot is Booked']]);
             }
-
 
             $form_data = new Appoiment();
             $form_data->patient_id  = $request->patient;
@@ -151,8 +154,7 @@ class AppoimentController extends Controller
             //VALIDATION END
 
 
-            $slot_check = Appoiment::where('patient_id', $request->patient)
-            ->where('doctor_id', $request->doctor)
+            $slot_check = Appoiment::where('doctor_id', $request->doctor)
             ->whereDate('date_time', $request->date_time)
             ->where('slot_id', $request->slot)
             ->first();

@@ -22,7 +22,7 @@ Route::group(['namespace' => 'patient', 'as' => 'patient.'], function () {
 
         Route::get('/', [DashboardController::class, 'dashboard'])->name('dashboard');
 
-        Route::group(['namespace' => 'appoiment', 'prefix' => 'appoiment', 'as' => 'appoiment.'], function () {
+        Route::group(['namespace' => 'appointment', 'prefix' => 'appointment', 'as' => 'appoiment.'], function () {
             Route::match(['get', 'post'], 'list', [AppoimentController::class, 'list'])->name('list');
             Route::match(['get', 'post'], 'add', [AppoimentController::class, 'add'])->name('add');
             Route::match(['get', 'post'], 'edit/{id}', [AppoimentController::class, 'edit'])->name('edit');

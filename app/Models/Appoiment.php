@@ -19,4 +19,9 @@ class Appoiment extends Model
     {
         return $this->belongsTo(Doctor::class);
     }
+
+    public function slot()
+    {
+        return $this->belongsTo(Slot::class);
+    }
 }

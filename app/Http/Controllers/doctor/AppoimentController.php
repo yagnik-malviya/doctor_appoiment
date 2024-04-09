@@ -23,7 +23,7 @@ class AppoimentController extends Controller
         $doctor = Doctor::where('user_id', Auth::user()->id)->first();
         if($request->ajax())
         {
-            $data = Appoiment::where('doctor_id', $doctor->id)->with('doctor', 'patient')->orderBy('date_time','ASC');
+            $data = Appoiment::where('doctor_id', $doctor->id)->with('doctor', 'patient')->orderBy('id','DESC');
 
                 return DataTables::of($data)
                 ->addIndexColumn()
@@ -41,6 +41,10 @@ class AppoimentController extends Controller
                 ->editColumn('date', function ($row)
                 {
                     return date("d-m-Y", strtotime($row->date_time));
+                })
+
+                ->editColumn('slot', function ($row) {
+                    return $row->slot->slot ?? '-';
                 })
 
                 ->addColumn('status', function($row){
@@ -87,8 +91,7 @@ class AppoimentController extends Controller
 
             //VALIDATION END
 
-            $slot_check = Appoiment::where('patient_id', $request->patient)
-            ->where('doctor_id', $doctor->id)
+            $slot_check = Appoiment::where('doctor_id', $doctor->id)
             ->whereDate('date_time', $request->date_time)
             ->where('slot_id', $request->slot)
             ->first();
@@ -141,8 +144,7 @@ class AppoimentController extends Controller
             //VALIDATION END
 
 
-            $slot_check = Appoiment::where('patient_id', $request->patient)
-            ->where('doctor_id', $doctor->id)
+            $slot_check = Appoiment::where('doctor_id', $doctor->id)
             ->whereDate('date_time', $request->date_time)
             ->where('slot_id', $request->slot)
             ->first();

@@ -9,6 +9,6 @@
 <body>
     <p>Dear {{$details['name']}},</p>
     <h4>Your Forgate Password Link :</h4>
-    <a href="{{$details['link']}}">Click for forget Password</a>
+    <a href="{{$details['link']}}">Click for Forgot Password</a>
 </body>
 </html>

@@ -31,6 +31,7 @@
             $(function () {
 		        var table = $('.table').DataTable({
 		            processing: true,
+searching: false,
 		            serverSide: true,
 		            ajax: "{{ route('admin.category.list') }}",
 		            columns: [
